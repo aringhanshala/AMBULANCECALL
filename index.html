@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambulance Booking</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Background Section -->
+    <div class="background-section">
+        <h2>Welcome to Ambulance Booking 🚑</h2>
+        <div id="authSection">
+            <!-- Authentication Buttons -->
+            <button id="googleSignIn" class="btn-primary" onclick="location.href='google-login.html'">Sign in with Google</button>
+            <button id="emailSignIn" class="btn-primary" onclick="location.href='email-signin.html'">Sign in with Email</button>
+            <button id="emailSignUp" class="btn-secondary" onclick="location.href='email-signup.html'">Sign up with Email</button>
+            <button id="phoneSignIn" class="btn-primary" onclick="location.href='phone-signin.html'">Sign in with Phone</button>
+        </div>
+
+        <div id="welcomeSection" style="display: none;">
+            <h3>Welcome, <span id="userName"></span></h3>
+            <button id="signOut" class="btn-secondary">Sign out</button>
+        </div>
+
+        <!-- The Booking Form -->
+        <div id="bookingSection" style="display: none;">
+            <h3>Book an Ambulance</h3>
+            <button class="btn-primary" id="bookButton" onclick="location.href='booking.html'">Go to Book Ambulance</button>
+        </div>
+    </div>
+
+    <!-- Debugging reCAPTCHA -->
+    <div id="recaptcha-container"></div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { getAuth, onAuthStateChanged, signOut, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { auth } from "./firebaseConfig.js";
+
+        const authInstance = getAuth();
+
+        // Check if the user is logged in
+        onAuthStateChanged(authInstance, (user) => {
+            if (user) {
+                console.log("User is logged in:", user);
+                document.getElementById("authSection").style.display = "none";
+                document.getElementById("welcomeSection").style.display = "block";
+                document.getElementById("bookingSection").style.display = "block";
+                document.getElementById("userName").textContent = user.displayName || user.email || "User";
+            } else {
+                console.log("No user is logged in.");
+                document.getElementById("authSection").style.display = "block";
+                document.getElementById("welcomeSection").style.display = "none";
+                document.getElementById("bookingSection").style.display = "none";
+            }
+        });
+
+        // Sign out functionality
+        const signOutBtn = document.getElementById("signOut");
+        if (signOutBtn) {
+            signOutBtn.addEventListener("click", () => {
+                signOut(authInstance)
+                    .then(() => {
+                        console.log("User signed out successfully.");
+                        document.getElementById("authSection").style.display = "block";
+                        document.getElementById("welcomeSection").style.display = "none";
+                        document.getElementById("bookingSection").style.display = "none";
+                    })
+                    .catch((error) => {
+                        console.error("Error signing out:", error);
+                    });
+            });
+        }
+
+        // Debugging reCAPTCHA
+        let recaptchaVerifier;
+        try {
+            recaptchaVerifier = new RecaptchaVerifier("recaptcha-container", {
+                size: "normal", // Change to "normal" for debugging
+                callback: (response) => {
+                    console.log("reCAPTCHA verified");
+                },
+                "expired-callback": () => {
+                    console.error("reCAPTCHA expired. Please refresh the page.");
+                },
+            }, authInstance);
+
+            recaptchaVerifier.render().then((widgetId) => {
+                console.log("reCAPTCHA rendered with widget ID:", widgetId);
+            });
+        } catch (error) {
+            console.error("Error initializing reCAPTCHA:", error);
+        }
+    </script>
+    <script src="script.js"></script>
+    <script type="module" src="firebaseConfig.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Sign in with Google</h2>
+        <p id="statusMessage">Please wait while we authenticate you...</p>
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { auth } from "./firebaseConfig.js";
+
+        const provider = new GoogleAuthProvider();
+        const authInstance = getAuth();
+
+        // Force account selection every time
+        provider.setCustomParameters({
+            prompt: "select_account",
+        });
+
+        // Perform Google Sign-In using Popup
+        signInWithPopup(authInstance, provider)
+            .then((result) => {
+                console.log("Sign-in successful:", result.user);
+                document.getElementById("statusMessage").textContent = "Sign-in successful. Redirecting...";
+                // Redirect to the home page after successful login
+                window.location.href = "index.html";
+            })
+            .catch((error) => {
+                console.error("Sign-in error:", error);
+                alert("Error during sign-in: " + error.message);
+                // Redirect back to the home page on error
+                window.location.href = "index.html";
+            });
+    </script>
+
+    <style>
+        /* Add a spinner for better UX */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .login-container {
+            text-align: center;
+            margin-top: 20%;
+        }
+    </style>
+
+</body>
+</html>

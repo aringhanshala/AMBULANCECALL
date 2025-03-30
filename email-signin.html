@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sign-In</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Sign in with Email</h2>
+        <form id="emailSignInForm">
+            <input type="email" id="email" placeholder="Enter your email" required>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+        <p id="statusMessage"></p>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { auth } from "./firebaseConfig.js";
+
+        const authInstance = getAuth();
+        const form = document.getElementById("emailSignInForm");
+        const statusMessage = document.getElementById("statusMessage");
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            signInWithEmailAndPassword(authInstance, email, password)
+                .then((result) => {
+                    console.log("Sign-in successful:", result.user);
+                    statusMessage.textContent = "Sign-in successful. Redirecting...";
+                    window.location.href = "index.html";
+                })
+                .catch((error) => {
+                    console.error("Sign-in error:", error);
+                    statusMessage.textContent = "Error: " + error.message;
+                });
+        });
+    </script>
+
+</body>
+</html>
