@@ -1,8 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+// ✅ No need to use import/export in compat mode
 
-// Firebase configuration (Restrict API Key in Firebase Console)
+// ✅ Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDOQYpChCgaVuA21jauKTeC9GakZ_GBUOI",
     authDomain: "ambulancecall-87335.firebaseapp.com",
@@ -13,23 +11,7 @@ const firebaseConfig = {
     measurementId: "G-YLGTRMWP51"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// ✅ Initialize Firebase globally
+firebase.initializeApp(firebaseConfig);
 
-// Set authentication persistence
-setPersistence(auth, browserLocalPersistence)
-    .then(() => {
-        console.log("✅ Authentication persistence set to local.");
-    })
-    .catch((error) => {
-        console.error("❌ Error setting persistence:", error);
-    });
-
-// Ensure reCAPTCHA compatibility
-auth.languageCode = "en"; // Set language for reCAPTCHA (optional)
 console.log("🔥 Firebase initialized successfully");
-
-// Export Firebase instances
-export { app, auth, db };

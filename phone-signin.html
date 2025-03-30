@@ -4,121 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phone Sign-In</title>
-    <link rel="stylesheet" href="styles.css">
+
+    <!-- ✅ Firebase compat SDK (LOAD THESE FIRST) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <!-- ✅ Firebase Config (NO `import` needed) -->
+    <script src="firebaseConfig.js"></script>
 </head>
 <body>
+    <h2>Phone Sign-In</h2>
+    <input type="text" id="phone" placeholder="+91 9876543210">
+    <div id="recaptcha-container"></div>
+    <button id="sendOTP">Send OTP</button>
+    
+    <input type="text" id="otp" placeholder="Enter OTP">
+    <button id="verifyOTP">Verify OTP</button>
+    
+    <p id="error-message" style="color: red;"></p>
 
-    <div class="login-container">
-        <h2>Sign in with Phone</h2>
-        <form id="phoneSignInForm">
-            <div>
-                <input type="text" id="countryCode" placeholder="Country Code (e.g., +1)" required>
-                <input type="tel" id="phoneNumber" placeholder="Phone Number (e.g., 1234567890)" required>
-            </div>
-            <button type="submit" class="btn-primary">Send OTP</button>
-        </form>
-        <div id="otpSection" style="display: none;">
-            <input type="text" id="otp" placeholder="Enter OTP" required>
-            <button id="verifyOtp" class="btn-primary">Verify OTP</button>
-        </div>
-        <p id="statusMessage"></p>
-        <div id="recaptcha-container"></div>
-    </div>
-
-    <!-- Scripts -->
-    <script type="module">
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-        import { auth } from "./firebaseConfig.js";
-
-        const authInstance = auth; // Use the exported auth instance from firebaseConfig.js
-        const phoneForm = document.getElementById("phoneSignInForm");
-        const otpSection = document.getElementById("otpSection");
-        const verifyOtpBtn = document.getElementById("verifyOtp");
-        const statusMessage = document.getElementById("statusMessage");
-
-        let confirmationResult;
-
-        // Initialize reCAPTCHA
-        let recaptchaVerifier;
-        try {
-            recaptchaVerifier = new RecaptchaVerifier("recaptcha-container", {
-                size: "normal", // Change to "normal" for debugging
-                callback: (response) => {
-                    console.log("reCAPTCHA verified");
-                },
-                "expired-callback": () => {
-                    console.error("reCAPTCHA expired. Please refresh the page.");
-                    statusMessage.textContent = "reCAPTCHA expired. Please refresh the page.";
-                },
-            }, authInstance);
-
-            recaptchaVerifier.render().then((widgetId) => {
-                console.log("reCAPTCHA rendered with widget ID:", widgetId);
-            });
-        } catch (error) {
-            console.error("Error initializing reCAPTCHA:", error);
-            statusMessage.textContent = "Error initializing reCAPTCHA. Please try again.";
-        }
-
-        // Validate phone number format
-        function isValidPhoneNumber(phoneNumber) {
-            const phoneRegex = /^\+[1-9]\d{1,14}$/; // E.164 format
-            return phoneRegex.test(phoneNumber);
-        }
-
-        // Handle phone number submission
-        phoneForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const countryCode = document.getElementById("countryCode").value.trim();
-            const phoneNumber = document.getElementById("phoneNumber").value.trim();
-
-            if (!countryCode || !phoneNumber) {
-                statusMessage.textContent = "Please enter a valid country code and phone number.";
-                return;
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            try {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
+                    size: "invisible",
+                    callback: function (response) {
+                        console.log("reCAPTCHA verified:", response);
+                    },
+                    "expired-callback": function () {
+                        console.log("reCAPTCHA expired, please refresh.");
+                    }
+                });
+            } catch (error) {
+                console.error("Error initializing reCAPTCHA:", error);
+                document.getElementById("error-message").innerText = "Error initializing reCAPTCHA. Please try again.";
             }
+        });
 
-            const fullPhoneNumber = `${countryCode}${phoneNumber}`;
-            if (!isValidPhoneNumber(fullPhoneNumber)) {
-                statusMessage.textContent = "Please enter a valid phone number in E.164 format (e.g., +1234567890).";
-                return;
-            }
+        document.getElementById("sendOTP").addEventListener("click", function () {
+            var phoneNumber = document.getElementById("phone").value;
+            var appVerifier = window.recaptchaVerifier;
 
-            statusMessage.textContent = "Sending OTP...";
-            signInWithPhoneNumber(authInstance, fullPhoneNumber, recaptchaVerifier)
-                .then((result) => {
-                    confirmationResult = result;
-                    otpSection.style.display = "block";
-                    statusMessage.textContent = "OTP sent. Please check your phone.";
-                    console.log("OTP sent successfully to:", fullPhoneNumber);
-                })
-                .catch((error) => {
+            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+                .then(function (confirmationResult) {
+                    window.confirmationResult = confirmationResult;
+                    alert("OTP Sent!");
+                }).catch(function (error) {
                     console.error("Error sending OTP:", error);
-                    statusMessage.textContent = "Error: " + error.message;
+                    document.getElementById("error-message").innerText = "Error sending OTP. Please check your number.";
                 });
         });
 
-        // Handle OTP verification
-        verifyOtpBtn.addEventListener("click", () => {
-            const otp = document.getElementById("otp").value.trim();
+        document.getElementById("verifyOTP").addEventListener("click", function () {
+    var code = document.getElementById("otp").value;
 
-            if (!otp) {
-                statusMessage.textContent = "Please enter the OTP.";
-                return;
-            }
-
-            statusMessage.textContent = "Verifying OTP...";
-            confirmationResult.confirm(otp)
-                .then((result) => {
-                    console.log("Phone sign-in successful:", result.user);
-                    statusMessage.textContent = "Sign-in successful. Redirecting...";
-                    window.location.href = "index.html";
-                })
-                .catch((error) => {
-                    console.error("Error verifying OTP:", error);
-                    statusMessage.textContent = "Error: " + error.message;
-                });
+    window.confirmationResult.confirm(code)
+        .then(function (result) {
+            alert("✅ Phone Number Verified!");
+            
+            // ✅ Redirect to the main page after successful verification
+            window.location.href = "index.html";  
+        })
+        .catch(function (error) {
+            console.error("❌ Error verifying OTP:", error);
+            document.getElementById("error-message").innerText = "Invalid OTP. Please try again.";
         });
+});
+
     </script>
-
 </body>
 </html>
