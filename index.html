@@ -17,7 +17,6 @@
             <button id="googleSignIn" class="btn-primary" onclick="location.href='google-login.html'">Sign in with Google</button>
             <button id="emailSignIn" class="btn-primary" onclick="location.href='email-signin.html'">Sign in with Email</button>
             <button id="emailSignUp" class="btn-secondary" onclick="location.href='email-signup.html'">Sign up with Email</button>
-            <button id="phoneSignIn" class="btn-primary" onclick="location.href='phone-signin.html'">Sign in with Phone</button>
         </div>
 
         <div id="welcomeSection" style="display: none;">
@@ -32,12 +31,9 @@
         </div>
     </div>
 
-    <!-- Debugging reCAPTCHA -->
-    <div id="recaptcha-container"></div>
-
     <!-- Scripts -->
     <script type="module">
-        import { getAuth, onAuthStateChanged, signOut, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
         import { auth } from "./firebaseConfig.js";
 
         const authInstance = getAuth();
@@ -73,26 +69,6 @@
                         console.error("Error signing out:", error);
                     });
             });
-        }
-
-        // Debugging reCAPTCHA
-        let recaptchaVerifier;
-        try {
-            recaptchaVerifier = new RecaptchaVerifier("recaptcha-container", {
-                size: "normal", // Change to "normal" for debugging
-                callback: (response) => {
-                    console.log("reCAPTCHA verified");
-                },
-                "expired-callback": () => {
-                    console.error("reCAPTCHA expired. Please refresh the page.");
-                },
-            }, authInstance);
-
-            recaptchaVerifier.render().then((widgetId) => {
-                console.log("reCAPTCHA rendered with widget ID:", widgetId);
-            });
-        } catch (error) {
-            console.error("Error initializing reCAPTCHA:", error);
         }
     </script>
     <script src="script.js"></script>

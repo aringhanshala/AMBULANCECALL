@@ -1,4 +1,4 @@
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 import { auth } from "./firebaseConfig.js";
 
 // Elements
@@ -8,7 +8,6 @@ const userName = document.getElementById("userName");
 const googleSignInBtn = document.getElementById("googleSignIn");
 const emailSignInBtn = document.getElementById("emailSignIn");
 const emailSignUpBtn = document.getElementById("emailSignUp");
-const phoneSignInBtn = document.getElementById("phoneSignIn");
 const signOutBtn = document.getElementById("signOut");
 const bookingSection = document.getElementById("bookingSection");
 
@@ -60,42 +59,6 @@ if (emailSignUpBtn) {
     });
 }
 
-// Phone Authentication
-if (phoneSignInBtn) {
-    phoneSignInBtn.addEventListener("click", () => {
-        const phoneNumber = prompt("Enter your phone number (with country code):");
-        if (phoneNumber) {
-            // Set up reCAPTCHA
-            window.recaptchaVerifier = new RecaptchaVerifier("phoneSignIn", {
-                size: "invisible",
-                callback: (response) => {
-                    console.log("reCAPTCHA verified");
-                },
-            }, auth);
-
-            const appVerifier = window.recaptchaVerifier;
-
-            // Send OTP
-            signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-                .then((confirmationResult) => {
-                    const otp = prompt("Enter the OTP sent to your phone:");
-                    if (otp) {
-                        confirmationResult.confirm(otp)
-                            .then((result) => {
-                                updateUI(result.user);
-                            })
-                            .catch((error) => {
-                                showError("Invalid OTP. Please try again.");
-                            });
-                    }
-                })
-                .catch((error) => {
-                    showError(error.message);
-                });
-        }
-    });
-}
-
 // Sign Out
 if (signOutBtn) {
     signOutBtn.addEventListener("click", () => {
@@ -115,7 +78,7 @@ function updateUI(user) {
         authSection.style.display = "none";
         welcomeSection.style.display = "block";
         bookingSection.style.display = "block";
-        userName.textContent = user.displayName || user.phoneNumber || user.email || "User";
+        userName.textContent = user.displayName || user.email || "User";
     }
 }
 
