@@ -1,5 +1,3 @@
-// ✅ No need to use import/export in compat mode
-
 // ✅ Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDOQYpChCgaVuA21jauKTeC9GakZ_GBUOI",
@@ -13,5 +11,8 @@ const firebaseConfig = {
 
 // ✅ Initialize Firebase globally
 firebase.initializeApp(firebaseConfig);
+
+// ✅ Initialize Firebase Authentication globally
+const auth = firebase.auth();
 
 console.log("🔥 Firebase initialized successfully");

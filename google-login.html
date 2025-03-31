@@ -15,13 +15,15 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module">
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-        import { auth } from "./firebaseConfig.js";
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="firebaseConfig.js"></script>
 
-        const provider = new GoogleAuthProvider();
-        const authInstance = getAuth();
+    <!-- Scripts -->
+    <script>
+        // Initialize Google Auth Provider
+        const provider = new firebase.auth.GoogleAuthProvider();
 
         // Force account selection every time
         provider.setCustomParameters({
@@ -29,7 +31,7 @@
         });
 
         // Perform Google Sign-In using Popup
-        signInWithPopup(authInstance, provider)
+        firebase.auth().signInWithPopup(provider)
             .then((result) => {
                 console.log("Sign-in successful:", result.user);
                 document.getElementById("statusMessage").textContent = "Sign-in successful. Redirecting...";

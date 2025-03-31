@@ -5,20 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Available Ambulances</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* Ensure the html and body take up the full height */
+            background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
+            background-size: cover; /* Ensure the image covers the entire screen */
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .results-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            border-radius: 10px;
+            margin-top: 10%;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 
     <div class="results-container">
-        <h2>Available Ambulances 🚑</h2>
-        <ul id="ambulanceList" class="ambulance-list"></ul>
-        <button class="btn-secondary" onclick="location.href='index.html'">Back to Home</button>
+        <h2>Available Ambulances</h2>
+        <ul id="resultsList">
+            <!-- Ambulance options will be dynamically added here -->
+        </ul>
+        <button onclick="window.location.href='booking.html'" class="btn-secondary">Go Back</button>
     </div>
 
     <!-- Scripts -->
-    <script src="script.js"></script>
-    <script type="module" src="firebaseConfig.js"></script>
-    <script type="module" src="auth.js"></script>
+    <script>
+        // Mock data for available ambulances
+        const ambulances = [
+            { name: "City Hospital Ambulance", distance: 2.5 },
+            { name: "Green Valley Ambulance", distance: 3.0 },
+            { name: "Downtown Medical Ambulance", distance: 1.8 },
+            { name: "Sunrise Hospital Ambulance", distance: 4.2 },
+            { name: "Metro Care Ambulance", distance: 2.0 }
+        ];
+
+        // Display the ambulances
+        const resultsList = document.getElementById("resultsList");
+        ambulances.forEach((ambulance) => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `
+                ${ambulance.name} - ${ambulance.distance} km away
+                <button class="btn-primary" onclick="bookAmbulance('${ambulance.name}')">Book</button>
+            `;
+            resultsList.appendChild(listItem);
+        });
+
+        // Handle booking
+        function bookAmbulance(ambulanceName) {
+            alert(`You have booked: ${ambulanceName}`);
+            console.log(`Booked Ambulance: ${ambulanceName}`);
+        }
+    </script>
 
 </body>
 </html>

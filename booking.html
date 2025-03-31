@@ -3,35 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book an Ambulance</title>
+    <title>Ambulance Booking</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* Ensure the html and body take up the full height */
+            background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
+            background-size: cover; /* Ensure the image covers the entire screen */
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .booking-container {
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            border-radius: 10px;
+            margin-top: 10%;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="form-container">
+    <div class="booking-container">
         <h2>Book an Ambulance</h2>
         <form id="bookingForm">
-            <label for="location">Your Location:</label>
-            <input type="text" id="location" placeholder="Enter your location" required>
-
-            <label for="budget">Budget (₹):</label>
-            <input type="number" id="budget" placeholder="Enter your budget" required>
-
-            <button type="submit" class="btn-primary">Find Ambulance</button>
+            <div>
+                <label for="location">Enter Your Location:</label>
+                <input type="text" id="location" placeholder="e.g., 123 Main Street, City" required>
+            </div>
+            <div>
+                <label for="phoneNumber">Enter Your Phone Number:</label>
+                <input type="tel" id="phoneNumber" placeholder="e.g., +1234567890" required>
+            </div>
+            <button type="submit" class="btn-primary">Submit</button>
         </form>
-        <div class="map-placeholder">📍 Map Integration Here</div>
+        <p id="statusMessage"></p>
     </div>
 
     <!-- Scripts -->
     <script>
-        // Clear previous booking data when this page loads
-        localStorage.removeItem("userLocation");
-        localStorage.removeItem("userBudget");
+        document.getElementById("bookingForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const location = document.getElementById("location").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
+            const statusMessage = document.getElementById("statusMessage");
+
+            if (!location) {
+                statusMessage.textContent = "Please enter your location.";
+                return;
+            }
+
+            if (!phoneNumber) {
+                statusMessage.textContent = "Please enter your phone number.";
+                return;
+            }
+
+            // Save the location and phone number in localStorage
+            localStorage.setItem("location", location);
+            localStorage.setItem("phoneNumber", phoneNumber);
+
+            // Redirect to the results page
+            window.location.href = "results.html";
+        });
     </script>
-    <script src="script.js"></script>
-    <script type="module" src="firebaseConfig.js"></script>
-    <script type="module" src="auth.js"></script>
 
 </body>
 </html>
