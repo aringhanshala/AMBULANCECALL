@@ -9,9 +9,9 @@
         html, body {
             margin: 0;
             padding: 0;
-            height: 100%; /* Ensure the html and body take up the full height */
+            height: 100%; /* Ensure the body and html take up the full height */
             background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
-            background-size: cover; /* Ensure the image covers the entire screen */
+            background-size: cover; /* Make the background image cover the entire screen */
             font-family: Arial, sans-serif;
             color: white;
         }
@@ -26,22 +26,33 @@
             margin-top: 10%;
         }
 
-        input, button {
-            width: 100%;
+        input {
+            width: calc(100% - 80px); /* Adjust width to fit the button inline */
             padding: 10px;
             margin: 10px 0;
             border: none;
             border-radius: 5px;
+            display: inline-block;
         }
 
         button {
             background-color: #007bff;
             color: white;
             cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
         }
 
         button:hover {
             background-color: #0056b3;
+        }
+
+        #useLocation {
+            width: auto;
+            padding: 10px 15px;
+            margin-left: 5px;
+            display: inline-block;
         }
 
         label {
@@ -63,6 +74,7 @@
             <div>
                 <label for="location">Enter Your Location:</label>
                 <input type="text" id="location" placeholder="e.g., 123 Main Street, City" required>
+                <button type="button" id="useLocation">📍</button>
             </div>
             <div>
                 <label for="phoneNumber">Enter Your Phone Number:</label>
@@ -75,12 +87,50 @@
 
     <!-- Scripts -->
     <script>
+        const useLocationButton = document.getElementById("useLocation");
+        const locationInput = document.getElementById("location");
+        const statusMessage = document.getElementById("statusMessage");
+
+        // Use Geolocation API to get the user's current location
+        useLocationButton.addEventListener("click", () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+
+                        // Use OpenStreetMap's Nominatim API to get the address
+                        const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+
+                        fetch(geocodeUrl)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.address) {
+                                    locationInput.value = data.display_name;
+                                    statusMessage.textContent = "Location fetched successfully!";
+                                } else {
+                                    statusMessage.textContent = "Unable to fetch address.";
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error fetching address:", error);
+                                statusMessage.textContent = "Error fetching address.";
+                            });
+                    },
+                    (error) => {
+                        console.error("Error getting location:", error);
+                        statusMessage.textContent = "Error getting location.";
+                    }
+                );
+            } else {
+                statusMessage.textContent = "Geolocation is not supported by your browser.";
+            }
+        });
+
         document.getElementById("bookingForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
-            const location = document.getElementById("location").value.trim();
+            const location = locationInput.value.trim();
             const phoneNumber = document.getElementById("phoneNumber").value.trim();
-            const statusMessage = document.getElementById("statusMessage");
 
             if (!location) {
                 statusMessage.textContent = "Please enter your location.";

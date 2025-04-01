@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Available Ambulances</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        html, body {
+        body {
             margin: 0;
             padding: 0;
-            height: 100%; /* Ensure the html and body take up the full height */
+            height: 100vh;
             background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
-            background-size: cover; /* Ensure the image covers the entire screen */
+            background-size: cover;
             font-family: Arial, sans-serif;
             color: white;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
         }
 
         .results-container {
@@ -21,79 +28,162 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
-            margin-top: 10%;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        ul li {
-            margin: 10px 0;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-        }
-
-        button {
-            background-color: #007bff;
             color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
         }
 
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        h2 {
+        .hospital-list {
             margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            color: black;
+        }
+
+        .hospital-list h3 {
+            margin: 0 0 10px;
+        }
+
+        .hospital-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .hospital-list li {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-
     <div class="results-container">
-        <h2>Available Ambulances</h2>
-        <ul id="resultsList">
-            <!-- Ambulance options will be dynamically added here -->
-        </ul>
+        <h2>Available Ambulances and Hospitals</h2>
+        <div class="hospital-list">
+            <h3>Top 5 Nearest Hospitals</h3>
+            <ul id="nearestHospitals">
+                <!-- Top 5 nearest hospitals will be dynamically added here -->
+            </ul>
+        </div>
+        <div id="map"></div>
         <button onclick="window.location.href='booking.html'" class="btn-secondary">Go Back</button>
     </div>
 
-    <!-- Scripts -->
     <script>
-        // Mock data for available ambulances
-        const ambulances = [
-            { name: "City Hospital Ambulance", distance: 2.5 },
-            { name: "Green Valley Ambulance", distance: 3.0 },
-            { name: "Downtown Medical Ambulance", distance: 1.8 },
-            { name: "Sunrise Hospital Ambulance", distance: 4.2 },
-            { name: "Metro Care Ambulance", distance: 2.0 }
-        ];
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 13); // Default center [latitude, longitude]
 
-        // Display the ambulances
-        const resultsList = document.getElementById("resultsList");
-        ambulances.forEach((ambulance) => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `
-                ${ambulance.name} - ${ambulance.distance} km away
-                <button class="btn-primary" onclick="bookAmbulance('${ambulance.name}')">Book</button>
-            `;
-            resultsList.appendChild(listItem);
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Define custom icons
+        const redIcon = L.icon({
+            iconUrl: 'assets/map.png', // Path to the custom red marker image
+            iconSize: [30, 40],
+            iconAnchor: [15, 40],
+            popupAnchor: [0, -35],
         });
 
-        // Handle booking
-        function bookAmbulance(ambulanceName) {
-            alert(`You have booked: ${ambulanceName}`);
-            console.log(`Booked Ambulance: ${ambulanceName}`);
+        const blueIcon = L.icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png', // Blue marker icon URL
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+        });
+
+        // Get the user's location from localStorage
+        const userLocation = localStorage.getItem("location");
+
+        if (userLocation) {
+            console.log("User Location from localStorage:", userLocation);
+
+            // Use OpenStreetMap's Nominatim API to get coordinates
+            const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(userLocation)}`;
+            console.log("Geocode URL:", geocodeUrl);
+
+            fetch(geocodeUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log("Geocoding Response:", data);
+
+                    if (data && data[0]) {
+                        const { lat, lon } = data[0];
+                        console.log("User Coordinates:", lat, lon);
+
+                        // Center the map on the user's location
+                        map.setView([lat, lon], 13);
+
+                        // Add a red marker for the user's location
+                        L.marker([lat, lon], { icon: redIcon }) // Use the custom redIcon for the user's location
+                            .addTo(map)
+                            .bindPopup(`<b>Your Location</b><br>${userLocation}`)
+                            .openPopup();
+
+                        // Fetch nearby hospitals using Overpass API
+                        const radius = 5000; // Search radius in meters (5 km)
+                        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node[amenity=hospital](around:${radius},${lat},${lon});out;`;
+
+                        fetch(overpassUrl)
+                            .then((response) => response.json())
+                            .then((data) => {
+                                console.log("Nearby Hospitals:", data.elements);
+
+                                // Calculate distances and sort hospitals
+                                const hospitalsWithDistance = data.elements.map((hospital) => {
+                                    const distance = calculateDistance(lat, lon, hospital.lat, hospital.lon);
+                                    return { ...hospital, distance };
+                                });
+
+                                // Sort hospitals by distance
+                                hospitalsWithDistance.sort((a, b) => a.distance - b.distance);
+
+                                // Get the top 5 nearest hospitals
+                                const top5Hospitals = hospitalsWithDistance.slice(0, 5);
+
+                                // Display the top 5 hospitals in the list
+                                const nearestHospitalsList = document.getElementById("nearestHospitals");
+                                top5Hospitals.forEach((hospital) => {
+                                    const hospitalName = hospital.tags.name || "Unnamed Hospital";
+                                    const listItem = document.createElement("li");
+                                    listItem.textContent = `${hospitalName} - ${hospital.distance.toFixed(2)} km`;
+                                    nearestHospitalsList.appendChild(listItem);
+                                });
+
+                                // Add markers for all hospitals
+                                hospitalsWithDistance.forEach((hospital) => {
+                                    const hospitalName = hospital.tags.name || "Unnamed Hospital";
+                                    L.marker([hospital.lat, hospital.lon], { icon: blueIcon })
+                                        .addTo(map)
+                                        .bindPopup(`<b>${hospitalName}</b><br>${hospital.distance.toFixed(2)} km`);
+                                });
+                            })
+                            .catch((error) => console.error("Error fetching hospitals:", error));
+                    } else {
+                        console.error("Unable to find coordinates for the location.");
+                    }
+                })
+                .catch((error) => console.error("Error fetching coordinates:", error));
+        } else {
+            console.error("No user location found in localStorage.");
+        }
+
+        // Function to calculate the distance between two points (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the Earth in km
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) *
+                Math.cos(lat2 * (Math.PI / 180)) *
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in km
         }
     </script>
-
 </body>
 </html>
