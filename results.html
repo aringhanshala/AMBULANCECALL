@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 100%; /* Ensure the background image covers the full page */
             background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: Arial, sans-serif;
@@ -28,7 +28,7 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.6); /* Black transparent background */
             border-radius: 10px;
             color: white;
         }
@@ -36,9 +36,9 @@
         .hospital-list {
             margin-bottom: 20px;
             padding: 10px;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.8); /* Black transparent background for the container */
             border-radius: 10px;
-            color: black;
+            color: white;
         }
 
         .hospital-list h3 {
@@ -52,7 +52,27 @@
         }
 
         .hospital-list li {
-            margin: 5px 0;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2); /* Light white transparent box for each hospital */
+            border-radius: 5px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hospital-list button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .hospital-list button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -147,8 +167,26 @@
                                 const nearestHospitalsList = document.getElementById("nearestHospitals");
                                 top5Hospitals.forEach((hospital) => {
                                     const hospitalName = hospital.tags.name || "Unnamed Hospital";
+
+                                    // Create a list item
                                     const listItem = document.createElement("li");
-                                    listItem.textContent = `${hospitalName} - ${hospital.distance.toFixed(2)} km`;
+
+                                    // Add hospital name and distance
+                                    const hospitalInfo = document.createElement("span");
+                                    hospitalInfo.textContent = `${hospitalName} - ${hospital.distance.toFixed(2)} km`;
+
+                                    // Create a "Book" button
+                                    const bookButton = document.createElement("button");
+                                    bookButton.textContent = "Book";
+                                    bookButton.onclick = () => {
+                                        alert(`Booking ambulance for ${hospitalName}`);
+                                    };
+
+                                    // Append the info and button to the list item
+                                    listItem.appendChild(hospitalInfo);
+                                    listItem.appendChild(bookButton);
+
+                                    // Append the list item to the list
                                     nearestHospitalsList.appendChild(listItem);
                                 });
 
