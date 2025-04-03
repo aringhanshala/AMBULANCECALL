@@ -13,33 +13,35 @@
     <!-- Background Section -->
     <div class="background-section">
         <h2>Welcome to Ambulance Booking 🚑</h2>
+        
+        <!-- Auth Section: Sign in/up options -->
         <div id="authSection">
-            <!-- Authentication Buttons -->
             <button id="googleSignIn" class="btn-primary" onclick="location.href='google-login.html'">Sign in with Google</button>
             <button id="emailSignIn" class="btn-primary" onclick="location.href='email-signin.html'">Sign in with Email</button>
             <button id="emailSignUp" class="btn-secondary" onclick="location.href='email-signup.html'">Sign up with Email</button>
         </div>
 
+        <!-- Welcome Section: Shows after authentication -->
         <div id="welcomeSection" style="display: none;">
             <h3>Welcome, <span id="userName"></span></h3>
             <button id="signOut" class="btn-secondary">Sign out</button>
         </div>
 
-        <!-- The Booking Form -->
+        <!-- Booking Section: Main functionality -->
         <div id="bookingSection" style="display: none;">
             <h3>Book an Ambulance</h3>
             <button class="btn-primary" id="bookButton" onclick="location.href='booking.html'">Go to Book Ambulance</button>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase Integration -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="firebaseConfig.js"></script>
 
-    <!-- Scripts -->
+    <!-- Authentication Logic -->
     <script>
-        // Check if the user is logged in
+        // Monitor authentication state changes
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 console.log("User is logged in:", user);
@@ -55,7 +57,7 @@
             }
         });
 
-        // Sign out functionality
+        // Handle sign out functionality
         const signOutBtn = document.getElementById("signOut");
         if (signOutBtn) {
             signOutBtn.addEventListener("click", () => {

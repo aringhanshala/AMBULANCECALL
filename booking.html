@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ambulance Booking</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Inline Styles -->
     <style>
         html, body {
             margin: 0;
             padding: 0;
-            height: 100%; /* Ensure the body and html take up the full height */
+            height: 100%;
             background: url('assets/ambulance-bg.jpg') no-repeat center center fixed;
-            background-size: cover; /* Make the background image cover the entire screen */
+            background-size: cover;
             font-family: Arial, sans-serif;
             color: white;
         }
@@ -21,13 +22,13 @@
             max-width: 500px;
             margin: 0 auto;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
             margin-top: 10%;
         }
 
         input {
-            width: calc(100% - 80px); /* Adjust width to fit the button inline */
+            width: calc(100% - 80px);
             padding: 10px;
             margin: 10px 0;
             border: none;
@@ -67,15 +68,17 @@
     </style>
 </head>
 <body>
-
+    <!-- Booking Form Container -->
     <div class="booking-container">
         <h2>Book an Ambulance</h2>
         <form id="bookingForm">
+            <!-- Location Input Section -->
             <div>
                 <label for="location">Enter Your Location:</label>
                 <input type="text" id="location" placeholder="e.g., 123 Main Street, City" required>
                 <button type="button" id="useLocation">📍</button>
             </div>
+            <!-- Phone Number Input Section -->
             <div>
                 <label for="phoneNumber">Enter Your Phone Number:</label>
                 <input type="tel" id="phoneNumber" placeholder="e.g., +1234567890" required>
@@ -85,20 +88,21 @@
         <p id="statusMessage"></p>
     </div>
 
-    <!-- Scripts -->
+    <!-- Location and Form Handling Scripts -->
     <script>
+        // DOM Elements
         const useLocationButton = document.getElementById("useLocation");
         const locationInput = document.getElementById("location");
         const statusMessage = document.getElementById("statusMessage");
 
-        // Use Geolocation API to get the user's current location
+        // Geolocation Handler
         useLocationButton.addEventListener("click", () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
 
-                        // Use OpenStreetMap's Nominatim API to get the address
+                        // Reverse Geocoding using OpenStreetMap's Nominatim API
                         const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
 
                         fetch(geocodeUrl)
@@ -126,12 +130,14 @@
             }
         });
 
+        // Form Submission Handler
         document.getElementById("bookingForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
             const location = locationInput.value.trim();
             const phoneNumber = document.getElementById("phoneNumber").value.trim();
 
+            // Form Validation
             if (!location) {
                 statusMessage.textContent = "Please enter your location.";
                 return;
@@ -142,14 +148,11 @@
                 return;
             }
 
-            // Save the location and phone number in localStorage
+            // Store Data and Redirect
             localStorage.setItem("location", location);
             localStorage.setItem("phoneNumber", phoneNumber);
-
-            // Redirect to the results page
             window.location.href = "results.html";
         });
     </script>
-
 </body>
 </html>
