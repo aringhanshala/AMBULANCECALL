@@ -1,5 +1,5 @@
 🚑 Ambulance Call
-Ambulance Call is a web-based platform that allows users to book ambulances based on their location and budget. It features authentication, a booking system, and a results page that filters available ambulances according to the user's budget.
+Ambulance Call is a web-based platform that allows users to book ambulances based on their location. It features authentication, a booking system, and a results page that filters available ambulances.
 
 🔥 Features
 ✅ User Authentication: Sign in using Google, email/password, or phone number (OTP) via Firebase.
@@ -39,11 +39,11 @@ Get the Firebase config and replace it in firebaseConfig.js
 Open index.html in your browser
 
 📌 Usage
-Sign in using Google, email, or phone OTP.
+Sign in using Google, email.
 
-Enter your location and budget.
+Enter your location and phone number.
 
-Get a list of available ambulances based on your budget.
+Get a list of available ambulances based on your location.
 
 Book an ambulance and confirm the details.
 
